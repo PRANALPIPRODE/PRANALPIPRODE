@@ -1,0 +1,67 @@
+//apex class
+
+public class AccRecordCreateUpdate {
+@AuraEnabled
+    public static list<Account> createRecord(string accNames,string accIndustries){
+        List<Account> accList = new List<Account>();
+        
+        if(accNames !=null){
+          Account Obj = new Account();
+          Obj.Name =accNames;
+          Obj.Industry = accIndustries;
+          accList.add(Obj); 
+          }
+        if(!accList.isEmpty()){
+             System.debug('accList:'+accList);
+            insert accList;
+            return accList;
+        }
+        return null;
+    }
+   }
+
+html file
+<template>
+   <lightning-card title="Record Creation By Apex">
+   <div class="slds-m-around_medium">
+    <lightning-input label="Id" disabled value={accountIds}></lightning-input>
+    <lightning-input label="Name" onchange={handleNameChange} class="slds-m-bottom_x-small"></lightning-input>
+    <lightning-input label="Industry" onchange={handleIndustryChange} class="slds-m-bottom_x-small"></lightning-input>
+
+    <lightning-button label="Save" variant="brand" onclick={onCreateAccount}></lightning-button>
+   </div>
+  </lightning-card> 
+</template>
+
+  //  js file
+
+import { LightningElement,} from 'lwc';
+import createRecord from '@salesforce/apex/AccRecordCreateUpdate.createRecord';
+
+export default class CreateRecordByApex extends LightningElement {
+ accountIds;
+ accountName;
+ accountIdustry;
+ 
+
+  handleNameChange(event){
+ this.accountName = event.target.value;
+ }
+ handleIndustryChange(event){
+this.accountIdustry = event.target.value;
+ }
+
+ onCreateAccount(){
+    createRecord({accNames: this.accountName,accIndustries :this.accountIndustry})
+    .then(result => {
+        this.accountIds = result[0].Id;
+        console.log("result:"+JSON.stringify(result))
+       
+    })
+    .catch(error =>{
+        console.error("error:"+JSON.stringify(error))
+    })
+ }
+
+
+}
